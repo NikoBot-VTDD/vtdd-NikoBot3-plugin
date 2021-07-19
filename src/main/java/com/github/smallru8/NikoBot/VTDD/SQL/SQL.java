@@ -90,6 +90,7 @@ public class SQL {
 				query = "CREATE TABLE VTDD_CHANNEL (\r\n" + 
 						"	Nickname VARCHAR(20) NOT NULL,\r\n" + 
 						"	VideoID VARCHAR(20),\r\n" + 
+						"	Emoji VARCHAR(20),\r\n" + 
 						"	PRIMARY KEY (Nickname)\r\n" + 
 						");";
 				ps = conn.prepareStatement(query);
