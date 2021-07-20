@@ -4,13 +4,18 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 import com.github.smallru8.NikoBot.Core;
 import com.github.smallru8.NikoBot.Embed;
 import com.github.smallru8.NikoBot.StdOutput;
+import com.github.smallru8.NikoBot.VTDD.VTDD;
 import com.github.smallru8.NikoBot.VTDD.SQL.VTDData;
 import com.github.smallru8.util.RegularExpression;
+
+import net.dv8tion.jda.api.EmbedBuilder;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.Role;
@@ -19,6 +24,7 @@ import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.api.events.role.RoleDeleteEvent;
+import net.dv8tion.jda.api.requests.restaction.pagination.ReactionPaginationAction;
 
 public class ServerRegister {
 
@@ -43,7 +49,7 @@ public class ServerRegister {
 			if(!sql.isMAPExistByUser(user))//沒有在其他伺服器有訂閱資料
 				sql.delVerifyStatusByUser(user);//清除
 		}
-		
+		VTDD.cmdChID.removeServer(serverID);
 	}
 	
 	/**
@@ -52,6 +58,7 @@ public class ServerRegister {
 	 */
 	public void recv_serverJoin(GuildJoinEvent gje) {
 		sql.addDCServer(gje.getGuild().getId());
+		VTDD.cmdChID.addServer(gje.getGuild().getId());
 	}
 	
 	/**
@@ -102,7 +109,35 @@ public class ServerRegister {
 				if(tmp.equalsIgnoreCase("ch")) {
 					CMDProcess_ch(cmdIt,msg);
 				}
+				//set command channel
+				else if(tmp.equalsIgnoreCase("set")) {
+					CMDProcess_set(cmdIt,msg);
+				}
+				//Vote role
+				else if(tmp.equalsIgnoreCase("vote")) {
+					CMDProcess_vote(msg);
+				}
 			}
+		}
+	}
+	
+	private void CMDProcess_vote(Message msg) {
+		generateVoteRoleMsg(msg,true,"","");
+	}
+	
+	private void CMDProcess_set(Iterator<String> cmdIt,Message msg) {
+		try {
+			String tmp = cmdIt.next();
+			tmp = tmp.replace("<","");
+			tmp = tmp.replace("#","");
+			tmp = tmp.replace(">","");
+			if(RegularExpression.isDigitOnly(tmp)&&msg.getGuild().getGuildChannelById(tmp)!=null) {
+				VTDD.cmdChID.updateChID(msg.getGuild().getId(), tmp);
+			}else {
+				msg.getChannel().sendMessage("Channel not found.").queue();
+			}
+		}catch(NoSuchElementException nsee) {
+			msg.getChannel().sendMessage("Command error.").queue();
 		}
 	}
 	
@@ -112,7 +147,7 @@ public class ServerRegister {
 			//Show all channel
 			//Show this server's channel
 			if(tmp.equalsIgnoreCase("ls")) {
-				String[] channelLs = sql.getChannel();
+				String[] channelLs = sql.getChannelAndEmoji();
 				String sum = "";
 				for(int i=0;i<channelLs.length;i++) {
 					sum+=":small_blue_diamond: ";
@@ -190,6 +225,47 @@ public class ServerRegister {
 			msg.getChannel().sendMessage("Command error.").queue();
 		}
 		//cmdIt.remove();
+	}
+	
+	private void generateVoteRoleMsg(Message msg,boolean newOne,String add,String rm) {
+		Map<String,String> nicknameEmoji = sql.getServerVTNicknameAndEmoji(msg.getGuild().getId());
+		EmbedBuilder embed = new EmbedBuilder();
+		String title = ":regional_indicator_g::regional_indicator_e::regional_indicator_t: :regional_indicator_r::regional_indicator_o::regional_indicator_l::regional_indicator_e:";
+		embed.setTitle(title);
+		String str = "Add any reaction to get role.";
+		for(Map.Entry<String, String> entry:nicknameEmoji.entrySet()) {
+			str+="\n"+entry.getValue()+" "+entry.getKey();
+		}
+		embed.setDescription(str);
+		embed.setColor(Color.PINK);
+		
+		if(newOne) {//產生一個新的 並記錄頻道,msgID	
+			msg.getChannel().sendMessage(embed.build()).queue((message) -> {
+				for(Map.Entry<String, String> entry:nicknameEmoji.entrySet()) {
+					message.addReaction(entry.getValue()).queue();
+				}
+				VTDD.cmdChID.updateVote(message.getGuild().getId(), message.getChannel().getId(), message.getId());//更新DB
+			});
+		}
+		else if(VTDD.cmdChID.getVoteChannel(msg.getGuild().getId())!=null&&VTDD.cmdChID.getVoteMsgID(msg.getGuild().getId())!=null){//更新舊有的 /vtdd ch <name> set tag <@tag> , /vtdd ch <name> remove 使用後要更新
+			Guild g = msg.getGuild();
+			g.getTextChannelById(VTDD.cmdChID.getVoteChannel(g.getId())).editMessageById(VTDD.cmdChID.getVoteMsgID(g.getId()), embed.build()).queue();
+			g.getTextChannelById(VTDD.cmdChID.getVoteChannel(g.getId())).retrieveMessageById(VTDD.cmdChID.getVoteMsgID(g.getId())).queue(message -> {
+				if(add!=null) {//新增 VT tag
+					String emoji = VTDD.vtdd.getChannelEMOJI(add);
+					message.addReaction(emoji).queue();
+				}
+				else if(rm!=null) {//刪除 VT tag
+					String emoji = VTDD.vtdd.getChannelEMOJI(rm);
+					ReactionPaginationAction users = message.retrieveReactionUsers(emoji);
+					String roleID = VTDD.vtdd.getTagID(g.getId(), VTDD.vtdd.getChannelbyEmoji(emoji));
+					users.forEach(user -> {
+						g.removeRoleFromMember(user.getId(), g.getRoleById(roleID)).queue();//從使用者身上移除role
+					});
+					message.clearReactions(emoji).queue();
+				}
+			});
+		}
 	}
 	
 }

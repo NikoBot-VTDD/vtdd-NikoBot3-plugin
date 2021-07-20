@@ -38,7 +38,9 @@ public class Listener extends ListenerAdapter{
 	@Override
 	public void onGuildMessageReceived(GuildMessageReceivedEvent gmre) {//加入退出群組等等USER指令
 		if(!gmre.getAuthor().isBot()) {
-			VTDD.UR.recv_msg(gmre);//user command
+			if(gmre.getChannel().getId().equalsIgnoreCase(VTDD.cmdChID.getChID(gmre.getGuild().getId())))//在指定頻道才處理
+				VTDD.UR.recv_msg(gmre);//user command
+			
 			VTDD.SR.recv_msg(gmre);//admin command
 			Help.recv_msg(gmre);//Help
 		}

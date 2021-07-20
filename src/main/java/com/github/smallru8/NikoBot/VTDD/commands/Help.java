@@ -2,6 +2,7 @@ package com.github.smallru8.NikoBot.VTDD.commands;
 
 import java.awt.Color;
 
+import com.github.smallru8.NikoBot.Core;
 import com.github.smallru8.NikoBot.Embed;
 
 import net.dv8tion.jda.api.entities.Message;
@@ -20,7 +21,7 @@ public class Help {
 	
 	public static void recv_msg(GuildMessageReceivedEvent e) {
 		Message msg = e.getMessage();
-		if(msg.getContentRaw().startsWith("/vtdd help")) {
+		if(Core.ADMINS.isAdmin(e.getGuild().getId(), msg.getAuthor().getId())&&msg.getContentRaw().startsWith("/vtdd help")) {
 			Embed.EmbedSender(Color.PINK, msg.getChannel(), ":regional_indicator_m: Admin Command", adminCmd);
 			Embed.EmbedSender(Color.PINK, msg.getChannel(), ":regional_indicator_u: Admin Command", userCmd);
 		}

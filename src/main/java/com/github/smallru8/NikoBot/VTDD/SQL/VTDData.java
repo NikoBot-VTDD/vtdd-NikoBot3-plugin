@@ -49,6 +49,91 @@ public class VTDData extends SQL{
 		return ret;
 	}
 	
+	public void setVote(String serverID,String ChID,String msgID) {
+		try {
+			Connection conn = getSQLConnection();
+			String query = "UPDATE VTDD_SERVER SET VoteChanne=?,VoteMsgID=? WHERE ServerID=?;";
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, ChID);
+			ps.setString(2, msgID);
+			ps.setString(3, serverID);
+			ps.executeUpdate();
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void setVoteChannelID(String serverID,String ChID) {
+		try {
+			Connection conn = getSQLConnection();
+			String query = "UPDATE VTDD_SERVER SET VoteChanne=? WHERE ServerID=?;";
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, ChID);
+			ps.setString(2, serverID);
+			ps.executeUpdate();
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	} 
+	
+	public void setVoteMsgID(String serverID,String MsgID) {
+		try {
+			Connection conn = getSQLConnection();
+			String query = "UPDATE VTDD_SERVER SET VoteMsgID=? WHERE ServerID=?;";
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, MsgID);
+			ps.setString(2, serverID);
+			ps.executeUpdate();
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void setCommandCh(String serverID,String chID) {
+		try {
+			Connection conn = getSQLConnection();
+			String query = "UPDATE VTDD_SERVER SET MsgChannel=? WHERE ServerID=?;";
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, chID);
+			ps.setString(2, serverID);
+			ps.executeUpdate();
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public Map<String,String[]> getAllCommandCh(){
+		Map<String,String[]> retm = new HashMap<String,String[]>();
+		try {
+			Connection conn = getSQLConnection();
+			String query = "SELECT ServerID,MsgChannel,VoteChannel,VoteMsgID FROM VTDD_SERVER;";
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ResultSet rs = ps.executeQuery();
+			while(rs.next()) {
+				String[] s = {rs.getString(2),rs.getString(3),rs.getString(4)};
+				retm.put(rs.getString(1),s);
+			}
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return retm;
+	}
+	
 	/**
 	 * Is the user existing
 	 * @param discordId
@@ -166,6 +251,47 @@ public class VTDData extends SQL{
 		}
 	}
 	
+	public void setChannelEMOJI(String channelNickname,String emoji) {
+		if(isChannelExist(channelNickname)) {
+			try {
+				Connection conn = getSQLConnection();
+				String query = "UPDATE VTDD_CHANNEL SET Emoji=? WHERE Nickname=?;";
+				PreparedStatement ps;
+				ps = conn.prepareStatement(query);
+				ps.setString(1, emoji);
+				ps.setString(2, channelNickname);
+				ps.executeUpdate();
+				ps.close();
+				conn.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public String getChannelEMOJI(String channelNickname) {
+		String ret = null;
+		try {
+			Connection conn = getSQLConnection();
+			String query = "SELECT Emoji FROM VTDD_CHANNEL WHERE Nickname=?;";
+			
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, channelNickname);
+			ResultSet rs = ps.executeQuery();
+			
+			if(rs.next())
+				ret = rs.getString(1);
+			
+			ps.close();
+			conn.close();
+			return ret;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return ret;
+	}
+	
 	/**
 	 * get channel's video id
 	 * @param channelNickname
@@ -194,21 +320,44 @@ public class VTDData extends SQL{
 		return ret;
 	}
 	
+	public String getChannelbyEmoji(String emoji) {
+		String ret = null;
+		try {
+			Connection conn = getSQLConnection();
+			String query = "SELECT Nickname FROM VTDD_CHANNEL WHERE Emoji=?;";
+			
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, emoji);
+			ResultSet rs = ps.executeQuery();
+			
+			if(rs.next())
+				ret = rs.getString(1);
+			
+			ps.close();
+			conn.close();
+			return ret;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return ret;
+	}
+	
 	/**
 	 * get all available channel
 	 * @return
 	 */
-	public String[] getChannel() {
+	public String[] getChannelAndEmoji() {
 		try {
 			ArrayList<String> tmp = new ArrayList<String>();
 			Connection conn = getSQLConnection();
-			String query = "SELECT Nickname FROM VTDD_CHANNEL;";
+			String query = "SELECT Emoji,Nickname FROM VTDD_CHANNEL;";
 			PreparedStatement ps;
 			ps = conn.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
 			
 			while(rs.next()) {
-				tmp.add(rs.getString(1));
+				tmp.add(rs.getString(1)+" "+rs.getString(2));
 			}
 				
 			ps.close();
@@ -535,6 +684,32 @@ public class VTDData extends SQL{
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public Map<String,String> getServerVTNicknameAndEmoji(String serverID){
+		Map<String,String> retm = new HashMap<String,String>();
+		try {
+			Connection conn = getSQLConnection();
+			String query = 
+					"SELECT VTDD_CHANNEL.Nickname,VTDD_CHANNEL.Emoji "
+					+ "FROM (SELECT * FROM VTDD_TAG WHERE ServerID=?) AS T1 "
+					+ "INNER JOIN VTDD_CHANNEL "
+					+ "ON T1.Nickname=VTDD_CHANNEL.Nickname;";
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, serverID);
+			ResultSet rs = ps.executeQuery();
+			
+			while(rs.next()) {
+				retm.put(rs.getString(1), rs.getString(2));
+			}
+			
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return retm;
 	}
 	
 	/**

@@ -20,4 +20,5 @@ public class RegularExpression {
 	public static boolean isLetterDigitOnly(String str) {
 		return str.matches("[A-Za-z0-9]*");
 	}
+	
 }

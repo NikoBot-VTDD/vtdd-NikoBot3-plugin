@@ -55,7 +55,7 @@ public class SQL {
 						"	Verify BOOLEAN,\r\n" + 
 						"	TS TIMESTAMP,\r\n" + 
 						"	PRIMARY KEY (DiscordID)\r\n" + 
-						");";
+						")CHARACTER SET=utf8mb4;";
 				ps = conn.prepareStatement(query);
 				ps.executeUpdate();
 			}else {
@@ -72,8 +72,10 @@ public class SQL {
 				query = "CREATE TABLE VTDD_SERVER (\r\n" + 
 						"	ServerID VARCHAR(20) NOT NULL, \r\n" + 
 						"	MsgChannel VARCHAR(20), \r\n" + 
+						"	VoteChannel VARCHAR(20), \r\n" + 
+						"	VoteMsgID VARCHAR(20), \r\n" + 
 						"	PRIMARY KEY (ServerID)\r\n" + 
-						");";
+						")CHARACTER SET=utf8mb4;";
 				ps = conn.prepareStatement(query);
 				ps.executeUpdate();
 			}else {
@@ -92,7 +94,7 @@ public class SQL {
 						"	VideoID VARCHAR(20),\r\n" + 
 						"	Emoji VARCHAR(20),\r\n" + 
 						"	PRIMARY KEY (Nickname)\r\n" + 
-						");";
+						")CHARACTER SET=utf8mb4;";
 				ps = conn.prepareStatement(query);
 				ps.executeUpdate();
 			}else {
@@ -114,7 +116,7 @@ public class SQL {
 						"	PRIMARY KEY (DiscordID,Nickname),\r\n" + 
 						"	FOREIGN KEY (DiscordID) REFERENCES VTDD_REGUSER(DiscordID),\r\n" + 
 						"	FOREIGN KEY (Nickname) REFERENCES VTDD_CHANNEL(Nickname)\r\n" + 
-						");";
+						")CHARACTER SET=utf8mb4;";
 				ps = conn.prepareStatement(query);
 				ps.executeUpdate();
 			}else {
@@ -135,7 +137,7 @@ public class SQL {
 						"	PRIMARY KEY (ServerID,Nickname),\r\n" + 
 						"	FOREIGN KEY (ServerID) REFERENCES VTDD_SERVER(ServerID),\r\n" + 
 						"	FOREIGN KEY (Nickname) REFERENCES VTDD_CHANNEL(Nickname)\r\n" + 
-						");";
+						")CHARACTER SET=utf8mb4;";
 				ps = conn.prepareStatement(query);
 				ps.executeUpdate();
 			}else {
@@ -155,7 +157,7 @@ public class SQL {
 						"	PRIMARY KEY (DiscordID,ServerID),\r\n" + 
 						"	FOREIGN KEY (DiscordID) REFERENCES VTDD_REGUSER(DiscordID),\r\n" + 
 						"	FOREIGN KEY (ServerID) REFERENCES VTDD_SERVER(ServerID),\r\n" + 
-						");";
+						")CHARACTER SET=utf8mb4;";
 				ps = conn.prepareStatement(query);
 				ps.executeUpdate();
 			}else {

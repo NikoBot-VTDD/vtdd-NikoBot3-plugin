@@ -112,7 +112,7 @@ public class UserRole {
 			//cmdIt.remove();
 		}catch(NoSuchElementException nsee) {
 			//cmdIt.remove();
-			msg.getChannel().sendMessage("Command error. usage: /vtdd join <channel nickname>").queue();
+			msg.getChannel().sendMessage("Command error. usage: /vtdd leave <channel nickname>").queue();
 		}
 	}
 }
