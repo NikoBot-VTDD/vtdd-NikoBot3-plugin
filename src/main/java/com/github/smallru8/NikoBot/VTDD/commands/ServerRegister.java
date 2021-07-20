@@ -85,7 +85,6 @@ public class ServerRegister {
 			sql.delTagById(e.getGuild().getId(), r.getId());
 	}
 	
-	//TODO 使用者被移除role
 	
 	/**
 	 * 指令接收
