@@ -52,7 +52,7 @@ public class VTDData extends SQL{
 	public void setVote(String serverID,String ChID,String msgID) {
 		try {
 			Connection conn = getSQLConnection();
-			String query = "UPDATE VTDD_SERVER SET VoteChanne=?,VoteMsgID=? WHERE ServerID=?;";
+			String query = "UPDATE VTDD_SERVER SET VoteChannel=?,VoteMsgID=? WHERE ServerID=?;";
 			PreparedStatement ps;
 			ps = conn.prepareStatement(query);
 			ps.setString(1, ChID);
@@ -69,7 +69,7 @@ public class VTDData extends SQL{
 	public void setVoteChannelID(String serverID,String ChID) {
 		try {
 			Connection conn = getSQLConnection();
-			String query = "UPDATE VTDD_SERVER SET VoteChanne=? WHERE ServerID=?;";
+			String query = "UPDATE VTDD_SERVER SET VoteChannel=? WHERE ServerID=?;";
 			PreparedStatement ps;
 			ps = conn.prepareStatement(query);
 			ps.setString(1, ChID);
