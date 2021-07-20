@@ -195,7 +195,7 @@ public class ServerRegister {
 
 					
 					if(tagID.length()<=20 && RegularExpression.isDigitOnly(tagID)) {
-						sql.addTag(msg.getGuild().getId(), channelNickname, tagID);
+						sql.addTag(msg.getGuild().getId(), channelNickname, tagID);//Tag更新
 						StdOutput.infoPrintln("Server: "+msg.getGuild().getId()+", Add TAG: "+channelNickname+"="+tagID);
 						msg.getChannel().sendMessage("Add binding "+channelNickname+":"+rawTagID).queue();
 					}
@@ -227,6 +227,13 @@ public class ServerRegister {
 		//cmdIt.remove();
 	}
 	
+	/**
+	 * 產生Vote role UI
+	 * @param msg
+	 * @param newOne
+	 * @param add
+	 * @param rm
+	 */
 	private void generateVoteRoleMsg(Message msg,boolean newOne,String add,String rm) {
 		Map<String,String> nicknameEmoji = sql.getServerVTNicknameAndEmoji(msg.getGuild().getId());
 		EmbedBuilder embed = new EmbedBuilder();

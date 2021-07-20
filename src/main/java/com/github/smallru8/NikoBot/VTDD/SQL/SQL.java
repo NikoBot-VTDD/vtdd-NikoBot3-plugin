@@ -113,6 +113,7 @@ public class SQL {
 						"	Nickname VARCHAR(20) NOT NULL,\r\n" + 
 						"	TS TIMESTAMP,\r\n" + 
 						"	STATUS BOOLEAN,\r\n" + 
+						"	REF INT,\r\n" +
 						"	PRIMARY KEY (DiscordID,Nickname),\r\n" + 
 						"	FOREIGN KEY (DiscordID) REFERENCES VTDD_REGUSER(DiscordID),\r\n" + 
 						"	FOREIGN KEY (Nickname) REFERENCES VTDD_CHANNEL(Nickname)\r\n" + 

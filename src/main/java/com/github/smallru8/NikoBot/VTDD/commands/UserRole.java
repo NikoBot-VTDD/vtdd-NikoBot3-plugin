@@ -71,6 +71,7 @@ public class UserRole {
 						g.addRoleToMember(userID, g.getRoleById(roleID)).queue();//驗證通過給群組
 						sql.updateVerifyStatus(userID, tmp, true);//更新驗證狀態
 						
+						
 						msg.getChannel().sendMessage("<@"+userID+"> subscribe channel: "+tmp+", :white_check_mark: Verified!!").queue();
 					}else {
 						msg.getChannel().sendMessage("<@"+userID+"> subscribe channel: "+tmp+", :x: verification failed!!").queue();

@@ -540,6 +540,50 @@ public class VTDData extends SQL{
 	}
 	
 	/**
+	 * 更新引用次數,使用者在幾個伺服器有這項認證
+	 * @param discordID
+	 * @param channelNickname
+	 * @param i
+	 */
+	public void updateVerifyStatusREF(String discordID,String channelNickname,int i) {//TODO 
+		try {
+			Connection conn = getSQLConnection();
+			String query = "UPDATE VTDD_VERIFY SET TS=TS,REF=REF+? WHERE DiscordID=? and Nickname=?;";	
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setInt(1, i);
+			ps.setString(2, discordID);
+			ps.setString(3, channelNickname);
+			ps.executeUpdate();
+			ps.close();
+			conn.close();
+			checkVerifyStatusREF(discordID);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * 確認還有被引用
+	 * @param discordID
+	 * @param i
+	 */
+	public void checkVerifyStatusREF(String discordID) {
+		try {
+			Connection conn = getSQLConnection();
+			String query = "DELETE FROM VTDD_VERIFY WHERE DiscordID=? AND REF<1;";
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, discordID);
+			ps.executeUpdate();
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	/**
 	 * Add new subscribe record to a user
 	 * @param discordID
 	 * @param channelNickname
@@ -548,7 +592,7 @@ public class VTDData extends SQL{
 		if(!isVerifyStatusExist(discordID,channelNickname)) {
 			try {
 				Connection conn = getSQLConnection();
-				String query = "INSERT INTO VTDD_VERIFY(DiscordID,Nickname) VALUES(?,?);";
+				String query = "INSERT INTO VTDD_VERIFY(DiscordID,Nickname,REF) VALUES(?,?,1);";
 				PreparedStatement ps;
 				ps = conn.prepareStatement(query);
 				ps.setString(1, discordID);
@@ -710,6 +754,30 @@ public class VTDData extends SQL{
 			e.printStackTrace();
 		}
 		return retm;
+	}
+	
+	public String getChannelNicknameByTagID(String serverID,String tagID) {
+		String ret = null;
+		try {
+			Connection conn = getSQLConnection();
+			String query = "SELECT Nickname FROM VTDD_TAG WHERE ServerID=? and TagID=?;";
+			
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, serverID);
+			ps.setString(2, tagID);
+			ResultSet rs = ps.executeQuery();
+			
+			if(rs.next())
+				ret = rs.getString(1);
+			
+			ps.close();
+			conn.close();
+			return ret;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return ret;
 	}
 	
 	/**
