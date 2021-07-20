@@ -12,8 +12,10 @@ public class Help {
 	
 	private static String adminCmd = 
 			"Show all available channel : /vtdd ch ls \n" +
-			"Set channel's membership only role : /vtdd ch <name> set tag <role> \n" +
-			"Remove channel's membership only role : /vtdd ch <name> remove \n";
+			"Set channel's membership only role : /vtdd ch <name> set tag <@role> \n" +
+			"Remove channel's membership only role : /vtdd ch <name> remove \n" +
+			"Set command channel : /vtdd set <#channel> \n" +
+			"Get role by reaction : /vtdd vote \n";
 	private static String userCmd = 
 			"User Command:\n" +
 			"Get role : /vtdd join <name> \n" +

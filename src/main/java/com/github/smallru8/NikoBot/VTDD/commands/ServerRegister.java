@@ -179,6 +179,7 @@ public class ServerRegister {
 					
 					//如果有舊的身分組刪除前先記錄起來
 					Role r = null;
+					
 					if(previousTagID!=null)
 						r = msg.getGuild().getRoleById(previousTagID);
 					List<Member> members = null;
@@ -200,6 +201,10 @@ public class ServerRegister {
 						msg.getChannel().sendMessage("Add binding "+channelNickname+":"+rawTagID).queue();
 					}
 					
+					if(r==null) {
+						generateVoteRoleMsg(msg,false,channelNickname,"");//Update vote role ui
+					}
+					
 					//原本有舊的身分組要加新的回去
 					//加新tag
 					if(previousTagID!=null&&!tagID.equals(previousTagID)) {
@@ -213,6 +218,7 @@ public class ServerRegister {
 				//remove tag
 				else if(cmdIt.next().equalsIgnoreCase("remove")) {
 					sql.delTag(msg.getGuild().getId(), channelNickname);
+					generateVoteRoleMsg(msg,false,"",channelNickname);//Remove from vote role ui
 					StdOutput.infoPrintln("Server: "+msg.getGuild().getId()+", Remove TAG: "+channelNickname);
 					msg.getChannel().sendMessage("Remove "+channelNickname+"'s tag binging.").queue();
 					msg.getChannel().sendMessage("You can remove the tag form your server.").queue();

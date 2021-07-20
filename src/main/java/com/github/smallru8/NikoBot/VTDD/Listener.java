@@ -1,6 +1,7 @@
 package com.github.smallru8.NikoBot.VTDD;
 
 import com.github.smallru8.NikoBot.VTDD.commands.Help;
+import com.github.smallru8.NikoBot.VTDD.commands.Reaction;
 
 import net.dv8tion.jda.api.entities.Role;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
@@ -9,6 +10,8 @@ import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleAddEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRoleRemoveEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionAddEvent;
+import net.dv8tion.jda.api.events.message.react.MessageReactionRemoveEvent;
 import net.dv8tion.jda.api.events.role.RoleDeleteEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 
@@ -58,6 +61,17 @@ public class Listener extends ListenerAdapter{
 		}
 	}
 	
+	@Override
+	public void onMessageReactionRemove(MessageReactionRemoveEvent event) {//user取消訂閱role
+		if(VTDD.cmdChID.getVoteChannel(event.getGuild().getId()).equalsIgnoreCase(event.getChannel().getId())&&VTDD.cmdChID.getVoteMsgID(event.getGuild().getId()).equals(event.getMessageId()))
+			Reaction.removeRole(event);
+	}
+	
+	@Override
+	public void onMessageReactionAdd(MessageReactionAddEvent event) {//user訂閱role
+		if(!event.getUser().isBot()&&VTDD.cmdChID.getVoteChannel(event.getGuild().getId()).equalsIgnoreCase(event.getChannel().getId())&&VTDD.cmdChID.getVoteMsgID(event.getGuild().getId()).equals(event.getMessageId()))
+			Reaction.addRole(event);
+	}
 	//指令操作
 	
 	@Override

@@ -545,7 +545,7 @@ public class VTDData extends SQL{
 	 * @param channelNickname
 	 * @param i
 	 */
-	public void updateVerifyStatusREF(String discordID,String channelNickname,int i) {//TODO 
+	public void updateVerifyStatusREF(String discordID,String channelNickname,int i) {
 		try {
 			Connection conn = getSQLConnection();
 			String query = "UPDATE VTDD_VERIFY SET TS=TS,REF=REF+? WHERE DiscordID=? and Nickname=?;";	
