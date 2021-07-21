@@ -253,9 +253,9 @@ public class ServerRegister {
 				else if(rm!=null) {//刪除 VT tag
 					String emoji = VTDD.vtdd.getChannelEMOJI(rm);
 					ReactionPaginationAction users = message.retrieveReactionUsers(emoji);
-					String roleID = VTDD.vtdd.getTagID(g.getId(), VTDD.vtdd.getChannelbyEmoji(emoji));
 					users.forEach(user -> {
-						g.removeRoleFromMember(user.getId(), g.getRoleById(roleID)).queue();//從使用者身上移除role
+						//從使用者身上移除role
+						UserJoinLeave.removeRolefromUser(g.getId(), user.getId(), rm);
 					});
 					message.clearReactions(emoji).queue();
 				}

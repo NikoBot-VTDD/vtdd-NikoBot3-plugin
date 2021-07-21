@@ -27,7 +27,10 @@ public class Reaction {
 			String channelNickname = VTDD.vtdd.getChannelbyEmoji(event.getReactionEmote().getEmoji());
 	
 			if(channelNickname!=null) {
-				UserJoinLeave.giveRole(event.getGuild().getId(), event.getUserId(), channelNickname);//TODO return bool 沒通過要刪reaction
+				if(!UserJoinLeave.giveRole(event.getGuild().getId(), event.getUserId(), channelNickname)) {//TODO return bool 沒通過要刪reaction
+					//沒通過, remove reaction
+					removeReaction(event.getGuild().getId(),event.getUserId(),channelNickname);
+				}
 			}
 		}else {//沒註冊
 			event.getUser().openPrivateChannel().queue(channel -> {

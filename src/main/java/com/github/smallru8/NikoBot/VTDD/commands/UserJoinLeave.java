@@ -16,27 +16,36 @@ public class UserJoinLeave {
 	 * @param channelNickname
 	 * @return
 	 */
-	public static String giveRole(String serverID,String discordID,String channelNickname) {//DONE
-		String ret = "";
+	public static boolean giveRole(String serverID,String discordID,String channelNickname) {//DONE
+		
 		if(VTDD.vtdd.isChannelExist(channelNickname)&&VTDD.vtdd.isTagExist(serverID, channelNickname)) {//頻道存在&&伺服器有訂閱
 			String roleID = VTDD.vtdd.getTagID(serverID, channelNickname);
 			Guild g = Core.botAPI.getGuildById(serverID);
 			if(!VTDD.vtdd.isMAPExist(serverID, discordID,channelNickname)) {//User沒訂閱過這個頻道
-				//TODO 如果有verify紀錄就跳過驗證,因為驗證沒過會自動刪掉
-				if(VTDD.conf.ytapi.verify(VTDD.vtdd.getRefTokenById(discordID), VTDD.vtdd.getChannelVideoId(channelNickname))) {//驗證
+				//如果有verify紀錄就跳過驗證,因為驗證沒過會自動刪掉
+				boolean verifyFlag = false;
+				if(VTDD.vtdd.isVerifyStatusExist(discordID, channelNickname)||(verifyFlag = VTDD.conf.ytapi.verify(VTDD.vtdd.getRefTokenById(discordID), VTDD.vtdd.getChannelVideoId(channelNickname)))==true) {//驗證
 					VTDD.vtdd.addMAP(serverID, discordID,channelNickname);//給Map
 					g.addRoleToMember(channelNickname, g.getRoleById(roleID)).queue();//驗證通過給群組
-					VTDD.vtdd.updateVerifyStatus(discordID, channelNickname, true);//更新驗證狀態
+					
+					if(verifyFlag)//有跑驗證且通過再刷新
+						VTDD.vtdd.updateVerifyStatus(discordID, channelNickname, true);//更新驗證狀態
 					VTDD.vtdd.updateVerifyStatusREF(discordID, channelNickname, 1);//引用+1
-					ret = "<@"+discordID+"> subscribe channel: "+channelNickname+", :white_check_mark: Verified!!";
+					
+					Core.botAPI.getUserById(discordID).openPrivateChannel().queue(channel -> {
+						channel.sendMessage("In "+serverID+", Channel: "+channelNickname+", :white_check_mark: Verified!!").queue();
+					});
+					return true;
 				}else {
-					ret = "<@"+discordID+"> subscribe channel: "+channelNickname+", :x: verification failed!!";
+					Core.botAPI.getUserById(discordID).openPrivateChannel().queue(channel -> {
+						channel.sendMessage("In "+serverID+", Channel: "+channelNickname+", :x: verification failed!!").queue();
+					});
+					return false;
 				}
 			}
-		}else {
-			ret = "Channel not found or this server wasn't setting this channel's role.";
 		}
-		return ret;
+		
+		return false;
 	}
 	
 	/**
@@ -44,10 +53,10 @@ public class UserJoinLeave {
 	 * @param serverID
 	 * @param discordID
 	 * @param channelNickname
-	 * @return
+	 * @return true if remove success
 	 */
-	public static String removeRolefromUser(String serverID,String discordID,String channelNickname) {//DONE
-		String ret = "";	
+	public static boolean removeRolefromUser(String serverID,String discordID,String channelNickname) {//DONE
+			
 		if(VTDD.vtdd.isChannelExist(channelNickname)&&VTDD.vtdd.isTagExist(serverID, channelNickname)) {//頻道存在&&伺服器有訂閱
 			Guild g = Core.botAPI.getGuildById(serverID);
 			String roleID = VTDD.vtdd.getTagID(serverID, channelNickname);
@@ -55,12 +64,10 @@ public class UserJoinLeave {
 				g.removeRoleFromMember(discordID, g.getRoleById(roleID)).queue();//從使用者身上移除role
 				VTDD.vtdd.delMAP(serverID, discordID, channelNickname);//拔MAP
 				VTDD.vtdd.updateVerifyStatusREF(discordID, channelNickname, -1);//引用-1
+				return true;
 			}
-			
-		}else {
-			ret = "Channel not found or this server wasn't setting this channel's role.";
 		}
-		return ret;
+		return false;
 	}
 	
 	/**
