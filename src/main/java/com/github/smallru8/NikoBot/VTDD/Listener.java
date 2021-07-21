@@ -46,7 +46,7 @@ public class Listener extends ListenerAdapter{
 	@Override
 	public void onMessageReactionAdd(MessageReactionAddEvent event) {//user訂閱role
 		if(!event.getUser().isBot()&&VTDD.cmdChID.getVoteChannel(event.getGuild().getId()).equalsIgnoreCase(event.getChannel().getId())&&VTDD.cmdChID.getVoteMsgID(event.getGuild().getId()).equals(event.getMessageId())) {
-			Reaction.addRole(event);//DONE
+			System.out.println("ADD ROLE");///
 		}
 	}
 	//指令操作

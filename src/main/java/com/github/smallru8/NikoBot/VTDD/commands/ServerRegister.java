@@ -103,7 +103,7 @@ public class ServerRegister {
 	}
 	
 	private void CMDProcess_vote(Message msg) {
-		generateVoteRoleMsg(msg,true,"","");
+		generateVoteRoleMsg(msg,true,null,null);
 	}
 	
 	private void CMDProcess_set(Iterator<String> cmdIt,Message msg) {
@@ -243,8 +243,7 @@ public class ServerRegister {
 		}
 		else if(VTDD.cmdChID.getVoteChannel(msg.getGuild().getId())!=null&&VTDD.cmdChID.getVoteMsgID(msg.getGuild().getId())!=null){//更新舊有的 /vtdd ch <name> set tag <@tag> , /vtdd ch <name> remove 使用後要更新
 			Guild g = msg.getGuild();
-			g.getTextChannelById(VTDD.cmdChID.getVoteChannel(g.getId())).editMessageById(VTDD.cmdChID.getVoteMsgID(g.getId()), embed.build()).queue();
-			g.getTextChannelById(VTDD.cmdChID.getVoteChannel(g.getId())).retrieveMessageById(VTDD.cmdChID.getVoteMsgID(g.getId())).queue(message -> {
+			g.getTextChannelById(VTDD.cmdChID.getVoteChannel(g.getId())).editMessageById(VTDD.cmdChID.getVoteMsgID(g.getId()), embed.build()).queue(message -> {
 				if(add!=null) {//新增 VT tag
 					String emoji = VTDD.vtdd.getChannelEMOJI(add);
 					message.addReaction(emoji).queue();
@@ -257,8 +256,7 @@ public class ServerRegister {
 							UserJoinLeave.removeRolefromUser(g.getId(), user.getId(), rm);
 						});
 					});
-					
-					message.clearReactions(emoji).queue();
+					message.removeReaction(emoji).queue();
 				}
 			});
 		}
