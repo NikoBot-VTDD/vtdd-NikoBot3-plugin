@@ -10,6 +10,7 @@ import org.quartz.JobExecutionException;
 import com.github.smallru8.NikoBot.Core;
 import com.github.smallru8.NikoBot.StdOutput;
 import com.github.smallru8.NikoBot.VTDD.VTDD;
+import com.github.smallru8.NikoBot.VTDD.commands.Reaction;
 
 import net.dv8tion.jda.api.entities.Guild;
 
@@ -40,7 +41,9 @@ public class VerifyJob implements Job {
 					Map<String,String> ServerTag = VTDD.vtdd.getServerTagByUserandNickname(userCnameMap.getKey(),channelNickname);
 					for (Map.Entry<String, String> entry : ServerTag.entrySet()) {//拔這個user在各個server的對應role
 						Guild g = Core.botAPI.getGuildById(entry.getKey());
+						Reaction.removeReaction(g.getId(), userCnameMap.getKey(), channelNickname);//拔Vote reaction
 						g.removeRoleFromMember(userCnameMap.getKey(), g.getRoleById(entry.getValue())).queue();//拔role
+						VTDD.vtdd.delMAP(g.getId(), userCnameMap.getKey(), channelNickname);//remove map
 					}
 					//刪認證
 					VTDD.vtdd.delVerifyStatus(userCnameMap.getKey(), channelNickname);

@@ -964,18 +964,20 @@ public class VTDData extends SQL{
 	}
 	
 	/**
-	 * get the users who subscribe any channel in target server  
+	 * 使用者在特定伺服器訂閱的所有項目
 	 * @param serverID
+	 * @param discordID
 	 * @return
 	 */
-	public String[] getMAP(String serverID) {
+	public String[] getMAP(String serverID,String discordID) {
 		try {
 			ArrayList<String> tmp = new ArrayList<String>();
 			Connection conn = getSQLConnection();
-			String query = "SELECT DiscordID FROM VTDD_MAP WHERE ServerID=?;";
+			String query = "SELECT Nickname FROM VTDD_MAP WHERE ServerID=? and DiscordID=?;";
 			PreparedStatement ps;
 			ps = conn.prepareStatement(query);
 			ps.setString(1, serverID);
+			ps.setString(2, discordID);
 			ResultSet rs = ps.executeQuery();
 			
 			while(rs.next()) {
@@ -992,19 +994,54 @@ public class VTDData extends SQL{
 	}
 	
 	/**
+	 * get the users who subscribe any channel in target server  
+	 * @param serverID
+	 * @return
+	 */
+	public Map<String,ArrayList<String>> getMAP(String serverID) {
+		try {
+			Map<String,ArrayList<String>> retm = new HashMap<String,ArrayList<String>>();
+			Connection conn = getSQLConnection();
+			String query = "SELECT DiscordID,Nickname FROM VTDD_MAP WHERE ServerID=?;";
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, serverID);
+			ResultSet rs = ps.executeQuery();
+			
+			while(rs.next()) {
+				if(retm.containsKey(rs.getString(1))) {//存在
+					retm.get(rs.getString(1)).add(rs.getString(2));
+				}else {//新建
+					ArrayList<String> arrL = new ArrayList<String>();
+					arrL.add(rs.getString(2));
+					retm.put(rs.getString(1), arrL);
+				}
+			}
+			
+			ps.close();
+			conn.close();
+			return retm;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
 	 * Bind user and server, when a user first subscribes channel in a server
 	 * @param serverID
 	 * @param discordID
 	 */
-	public void addMAP(String serverID,String discordID) {
-		if(!isMAPExist(serverID,discordID)) {
+	public void addMAP(String serverID,String discordID,String channelNickname) {
+		if(!isMAPExist(serverID,discordID,channelNickname)) {
 			try {
 				Connection conn = getSQLConnection();
-				String query = "INSERT INTO VTDD_MAP(ServerID,DiscordID) VALUES(?,?);";
+				String query = "INSERT INTO VTDD_MAP(ServerID,DiscordID,Nickname) VALUES(?,?,?);";
 				PreparedStatement ps;
 				ps = conn.prepareStatement(query);
 				ps.setString(1, serverID);
 				ps.setString(2, discordID);
+				ps.setString(3, channelNickname);
 				ps.executeUpdate();
 				ps.close();
 				conn.close();
@@ -1020,15 +1057,16 @@ public class VTDData extends SQL{
 	 * @param discordID
 	 * @return
 	 */
-	public boolean isMAPExist(String serverID,String discordID) {
+	public boolean isMAPExist(String serverID,String discordID,String channelNickname) {
 		boolean ret = false;
 		try {
 			Connection conn = getSQLConnection();
-			String query = "SELECT DiscordID FROM VTDD_MAP WHERE ServerID=? and DiscordID=?;";
+			String query = "SELECT DiscordID FROM VTDD_MAP WHERE ServerID=? and DiscordID=? and Nickname=?;";
 			PreparedStatement ps;
 			ps = conn.prepareStatement(query);
 			ps.setString(1, serverID);
 			ps.setString(2, discordID);
+			ps.setString(3, channelNickname);
 			ResultSet rs = ps.executeQuery();
 			if(rs.next()) 
 				ret = true;
@@ -1062,6 +1100,23 @@ public class VTDData extends SQL{
 			e.printStackTrace();
 		}
 		return ret;
+	}
+	
+	public void delMAP(String serverID,String discordID,String channelNickname) {
+		try {
+			Connection conn = getSQLConnection();
+			String query = "DELETE FROM VTDD_MAP WHERE ServerID=? and DiscordID=? and Nickname=?;";
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, serverID);
+			ps.setString(2, discordID);
+			ps.setString(3, channelNickname);
+			ps.executeUpdate();
+			ps.close();
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	/**
@@ -1115,11 +1170,18 @@ public class VTDData extends SQL{
 		Map<String,String> retm = new HashMap<String,String>();
 		try {
 			Connection conn = getSQLConnection();
+			/*
 			String query = 
 					"SELECT T1.ServerID,T1.TagID "
 					+ "FROM (SELECT * FROM VTDD_TAG WHERE Nickname=?) AS T1 "
 					+ "INNER JOIN (SELECT * FROM VTDD_MAP WHERE DiscordID=?) AS T2 "
 					+ "ON T1.ServerID=T2.ServerID;";
+			*/
+			String query = 
+					"SELECT T1.ServerID,T1.TagID "
+					+ "FROM (SELECT * FROM VTDD_TAG WHERE Nickname=?) AS T1 "
+					+ "INNER JOIN (SELECT * FROM VTDD_MAP WHERE DiscordID=?) AS T2 "
+					+ "ON T1.ServerID=T2.ServerID AND T1.Nickname=T2.Nickname;";
 			PreparedStatement ps;
 			ps = conn.prepareStatement(query);
 			ps.setString(1, channelNickname);
@@ -1136,5 +1198,43 @@ public class VTDData extends SQL{
 			e.printStackTrace();
 		}
 		return retm;
+	}
+	
+	/**
+	 * When server kick bot
+	 * @param serverID
+	 */
+	public void delAllDataFromServer(String serverID) {
+		try {
+			//VTDD_VERIFY.REF -1
+			String query = 
+					  "UPDATE VTDD_VERIFY SET TS=TS,REF=REF-1 "
+					+ "WHERE DiscordID IN (SELECT DiscordID FROM VTDD_MAP WHERE ServerID=?) AND Nickname IN (SELECT Nickname FROM VTDD_MAP WHERE ServerID=?);";
+
+			//Update VTDD_VERIFY.REF value
+			Connection conn = getSQLConnection();
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, serverID);
+			ps.setString(2, serverID);
+			ps.executeUpdate();
+			ps.close();
+			
+			//Check VTDD_VERIFY.REF value
+			query = "DELETE FROM VTDD_VERIFY WHERE REF<1 AND DiscordID IN (SELECT DiscordID FROM VTDD_MAP WHERE ServerID=?);";
+			ps = conn.prepareStatement(query);
+			ps.setString(1, serverID);
+			ps.executeUpdate();
+			ps.close();
+			
+			conn.close();
+			
+			delMAPByServer(serverID);
+			delTag(serverID);
+			delDCServer(serverID);
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 }

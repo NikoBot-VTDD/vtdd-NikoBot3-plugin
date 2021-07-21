@@ -15,6 +15,7 @@ public class Config {
 	public String passwd = "";
 	public String db = "";
 	public int verifyDayInterval = 2;
+	public String verifyURL = "";
 	
 	private String DEVELOPER_KEY = "";
 	private String clientID = "";
@@ -38,6 +39,7 @@ public class Config {
 				fw.write("clientID=id\n");
 				fw.write("clientSecret=secret\n");
 				fw.write("VerifyDayInterval=2\n");
+				fw.write("VerifyURL=https://vtdd.skunion.org/yue/index.html\n");
 				fw.flush();
 				fw.close();
 			} catch (IOException e) {
@@ -60,6 +62,7 @@ public class Config {
 			DEVELOPER_KEY = pro.getProperty("DEVELOPER_KEY","Key");
 			clientID = pro.getProperty("clientID","id");
 			clientSecret = pro.getProperty("clientSecret","secret");
+			verifyURL = pro.getProperty("VerifyURL", "https://vtdd.skunion.org/yue/index.html");
 			verifyDayInterval = Integer.parseInt(pro.getProperty("VerifyDayInterval","2"));
 			ytapi = new YTAPI(DEVELOPER_KEY,clientID,clientSecret);
 			pro.clear();

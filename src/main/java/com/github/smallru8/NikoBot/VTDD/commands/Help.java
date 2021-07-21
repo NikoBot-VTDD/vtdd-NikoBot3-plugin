@@ -16,16 +16,11 @@ public class Help {
 			"Remove channel's membership only role : /vtdd ch <name> remove \n" +
 			"Set command channel : /vtdd set <#channel> \n" +
 			"Get role by reaction : /vtdd vote \n";
-	private static String userCmd = 
-			"User Command:\n" +
-			"Get role : /vtdd join <name> \n" +
-			"Remove role : /vtdd leave <name> \n";
 	
 	public static void recv_msg(GuildMessageReceivedEvent e) {
 		Message msg = e.getMessage();
 		if(Core.ADMINS.isAdmin(e.getGuild().getId(), msg.getAuthor().getId())&&msg.getContentRaw().startsWith("/vtdd help")) {
 			Embed.EmbedSender(Color.PINK, msg.getChannel(), ":regional_indicator_m: Admin Command", adminCmd);
-			Embed.EmbedSender(Color.PINK, msg.getChannel(), ":regional_indicator_u: Admin Command", userCmd);
 		}
 	}
 	

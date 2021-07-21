@@ -23,7 +23,6 @@ import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.api.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.api.events.guild.member.GuildMemberRemoveEvent;
 import net.dv8tion.jda.api.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.api.events.role.RoleDeleteEvent;
 import net.dv8tion.jda.api.requests.restaction.pagination.ReactionPaginationAction;
 
 public class ServerRegister {
@@ -38,51 +37,35 @@ public class ServerRegister {
 	 * bot離開伺服器 刪檔
 	 * @param gle
 	 */
-	public void recv_serverLeave(GuildLeaveEvent gle) {
+	public void recv_serverLeave(GuildLeaveEvent gle) {//DONE
 		String serverID = gle.getGuild().getId();
-		sql.delTag(serverID);//刪除伺服器的Tag binding
-		String[] users = sql.getMAP(serverID);//這個伺服器有訂閱記錄的人
-		sql.delMAPByServer(serverID);//刪掉這個server的MAP
-		sql.delDCServer(serverID);//刪除伺服器
-		
-		for(String user:users) {
-			if(!sql.isMAPExistByUser(user))//沒有在其他伺服器有訂閱資料
-				sql.delVerifyStatusByUser(user);//清除
-		}
-		VTDD.cmdChID.removeServer(serverID);
+		sql.delAllDataFromServer(serverID);//清DB
+		VTDD.cmdChID.removeServer(serverID);//清cache
 	}
 	
 	/**
 	 * bot加入伺服器 建檔
 	 * @param gje
 	 */
-	public void recv_serverJoin(GuildJoinEvent gje) {
+	public void recv_serverJoin(GuildJoinEvent gje) {//DONE
 		sql.addDCServer(gje.getGuild().getId());
-		VTDD.cmdChID.addServer(gje.getGuild().getId());
+		VTDD.cmdChID.addServer(gje.getGuild().getId());//加cache
 	}
 	
 	/**
 	 * 有人退出伺服器
 	 * @param e
 	 */
-	public void recv_member(GuildMemberRemoveEvent e) {
-		String memberId = e.getMember().getId();
+	public void recv_member(GuildMemberRemoveEvent e) {//DONE
+		String memberId = e.getUser().getId();
 		if(sql.isUserExist(memberId)) {//有註冊在REGUSER才處理
+			String[] chLs = sql.getMAP(e.getGuild().getId(), memberId);
 			sql.delMAP(e.getGuild().getId(), memberId);//刪MAP
-			
-			if(!sql.isMAPExistByUser(memberId))//沒有在其他伺服器有訂閱資料
-				sql.delVerifyStatusByUser(memberId);//清除
+			for(String s:chLs) {
+				sql.updateVerifyStatusREF(memberId, s, -1);
+			}
+			Reaction.removeReaction(e.getGuild(),e.getUser());
 		}
-	}
-	
-	/**
-	 * role從伺服器上被刪除
-	 * @param e
-	 */
-	public void recv_role(RoleDeleteEvent e) {
-		Role r = e.getRole();
-		if(sql.isTagExistById(e.getGuild().getId(), r.getId()));
-			sql.delTagById(e.getGuild().getId(), r.getId());
 	}
 	
 	

@@ -5,7 +5,6 @@ import com.github.smallru8.NikoBot.VTDD.Quartz.VerifyScheduler;
 import com.github.smallru8.NikoBot.VTDD.SQL.VTDData;
 import com.github.smallru8.NikoBot.VTDD.commands.CMDChannelID;
 import com.github.smallru8.NikoBot.VTDD.commands.ServerRegister;
-import com.github.smallru8.NikoBot.VTDD.commands.UserRole;
 import com.github.smallru8.NikoBot.plugins.PluginsInterface;
 
 /**
@@ -19,7 +18,6 @@ public class VTDD implements PluginsInterface{
 	public static Config conf;
 	public static VTDData vtdd;
 	public static ServerRegister SR;
-	public static UserRole UR;
 	public static VerifyScheduler vs;
 	public static CMDChannelID cmdChID;
 	
@@ -35,7 +33,6 @@ public class VTDD implements PluginsInterface{
 		vtdd = new VTDData();
 		cmdChID = new CMDChannelID();
 		SR = new ServerRegister(vtdd);
-		UR = new UserRole(vtdd);
 		
 		Core.botAPI.addEventListener(new Listener());
 		

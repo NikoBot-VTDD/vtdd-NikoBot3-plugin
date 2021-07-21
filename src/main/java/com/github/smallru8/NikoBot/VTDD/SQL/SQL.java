@@ -24,7 +24,7 @@ public class SQL {
 		    StdOutput.errorPrintln("com.mysql.cj.jdbc.Driver not found.");
 		} 
 		Config conf = VTDD.conf;
-		host = "jdbc:mysql://"+conf.ip+":"+conf.port+"/"+conf.db;
+		host = "jdbc:mysql://"+conf.ip+":"+conf.port+"/"+conf.db+"?useUnicode=true&characterEncoding=UTF-8";
 		name = conf.name;
 		passwd = conf.passwd;
 		checkTable();
@@ -94,7 +94,7 @@ public class SQL {
 						"	VideoID VARCHAR(20),\r\n" + 
 						"	Emoji VARCHAR(20),\r\n" + 
 						"	PRIMARY KEY (Nickname)\r\n" + 
-						")CHARACTER SET=utf8mb4;";
+						")CHARACTER SET=utf8mb4 COLLATE utf8mb4_bin;";
 				ps = conn.prepareStatement(query);
 				ps.executeUpdate();
 			}else {
@@ -155,9 +155,11 @@ public class SQL {
 				query = "CREATE TABLE VTDD_MAP (\r\n" + 
 						"	DiscordID VARCHAR(20) NOT NULL,\r\n" + 
 						"	ServerID VARCHAR(20) NOT NULL,\r\n" + 
-						"	PRIMARY KEY (DiscordID,ServerID),\r\n" + 
+						"	Nickname VARCHAR(20) NOT NULL,\r\n" +
+						"	PRIMARY KEY (DiscordID,ServerID,Nickname),\r\n" + 
 						"	FOREIGN KEY (DiscordID) REFERENCES VTDD_REGUSER(DiscordID),\r\n" + 
 						"	FOREIGN KEY (ServerID) REFERENCES VTDD_SERVER(ServerID),\r\n" + 
+						"	FOREIGN KEY (Nickname) REFERENCES VTDD_CHANNEL(Nickname)"+
 						")CHARACTER SET=utf8mb4;";
 				ps = conn.prepareStatement(query);
 				ps.executeUpdate();
