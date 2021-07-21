@@ -147,9 +147,9 @@ public class ServerRegister {
 			}
 			else if(tmp.length() <= 20 && sql.isChannelExist(tmp)){//channel is exist
 				String channelNickname = tmp;
-				
+				String cmd0 = cmdIt.next();
 				//add/update tag 也要更新tag狀態
-				if(cmdIt.next().equalsIgnoreCase("set") && cmdIt.next().equalsIgnoreCase("tag")) {
+				if(cmd0.equalsIgnoreCase("set") && cmdIt.next().equalsIgnoreCase("tag")) {
 					String previousTagID = sql.getTagID(msg.getGuild().getId(), channelNickname);
 					tmp = cmdIt.next();//raw TagID
 					String rawTagID = tmp;
@@ -184,7 +184,7 @@ public class ServerRegister {
 					}
 					
 					if(r==null) {
-						generateVoteRoleMsg(msg,false,channelNickname,"");//Update vote role ui
+						generateVoteRoleMsg(msg,false,channelNickname,null);//Update vote role ui
 					}
 					
 					//原本有舊的身分組要加新的回去
@@ -198,11 +198,11 @@ public class ServerRegister {
 
 				}
 				//remove tag
-				else if(cmdIt.next().equalsIgnoreCase("remove")) {
+				else if(cmd0.equalsIgnoreCase("remove")) {
 					sql.delTag(msg.getGuild().getId(), channelNickname);
-					generateVoteRoleMsg(msg,false,"",channelNickname);//Remove from vote role ui
+					generateVoteRoleMsg(msg,false,null,channelNickname);//Remove from vote role ui
 					StdOutput.infoPrintln("Server: "+msg.getGuild().getId()+", Remove TAG: "+channelNickname);
-					msg.getChannel().sendMessage("Remove "+channelNickname+"'s tag binging.").queue();
+					msg.getChannel().sendMessage("Remove "+channelNickname+"'s tag binding.").queue();
 					msg.getChannel().sendMessage("You can remove the tag form your server.").queue();
 				}
 				
@@ -252,11 +252,13 @@ public class ServerRegister {
 				}
 				else if(rm!=null) {//刪除 VT tag
 					String emoji = VTDD.vtdd.getChannelEMOJI(rm);
-					ReactionPaginationAction users = message.retrieveReactionUsers(emoji);
-					users.forEach(user -> {
-						//從使用者身上移除role
-						UserJoinLeave.removeRolefromUser(g.getId(), user.getId(), rm);
+					message.retrieveReactionUsers(emoji).queue(users -> {
+						users.forEach(user -> {
+							//從使用者身上移除role
+							UserJoinLeave.removeRolefromUser(g.getId(), user.getId(), rm);
+						});
 					});
+					
 					message.clearReactions(emoji).queue();
 				}
 			});

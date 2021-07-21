@@ -26,7 +26,7 @@ public class UserJoinLeave {
 				boolean verifyFlag = false;
 				if(VTDD.vtdd.isVerifyStatusExist(discordID, channelNickname)||(verifyFlag = VTDD.conf.ytapi.verify(VTDD.vtdd.getRefTokenById(discordID), VTDD.vtdd.getChannelVideoId(channelNickname)))==true) {//驗證
 					VTDD.vtdd.addMAP(serverID, discordID,channelNickname);//給Map
-					g.addRoleToMember(channelNickname, g.getRoleById(roleID)).queue();//驗證通過給群組
+					g.addRoleToMember(discordID, g.getRoleById(roleID)).queue();//驗證通過給群組
 					
 					if(verifyFlag)//有跑驗證且通過再刷新
 						VTDD.vtdd.updateVerifyStatus(discordID, channelNickname, true);//更新驗證狀態
@@ -42,6 +42,8 @@ public class UserJoinLeave {
 					});
 					return false;
 				}
+			}else {
+				return true;//已經訂閱過(保留)
 			}
 		}
 		
