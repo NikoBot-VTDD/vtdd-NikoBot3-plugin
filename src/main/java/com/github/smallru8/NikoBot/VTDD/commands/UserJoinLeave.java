@@ -95,7 +95,7 @@ public class UserJoinLeave {
 							VTDD.vtdd.delMAP(serverID, user.getId(), channelNickname);//拔MAP
 							VTDD.vtdd.updateVerifyStatusREF(user.getId(), channelNickname, -1);//引用-1
 						});
-						message.clearReactions(emoji).queue();//清掉訂閱的EMOJI
+						message.removeReaction(emoji).queue();//清掉訂閱的EMOJI
 						VTDD.vtdd.delTag(serverID, channelNickname);//拔Tag
 					});
 				});
