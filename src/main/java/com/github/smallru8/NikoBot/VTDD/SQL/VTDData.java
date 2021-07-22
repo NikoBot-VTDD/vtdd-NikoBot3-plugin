@@ -548,7 +548,7 @@ public class VTDData extends SQL{
 	public void updateVerifyStatusREF(String discordID,String channelNickname,int i) {
 		try {
 			Connection conn = getSQLConnection();
-			String query = "UPDATE VTDD_VERIFY SET TS=TS,REF=REF+? WHERE DiscordID=? and Nickname=?;";	
+			String query = "UPDATE VTDD_VERIFY SET TS=TS,REF=REF+(?) WHERE DiscordID=? and Nickname=?;";	
 			PreparedStatement ps;
 			ps = conn.prepareStatement(query);
 			ps.setInt(1, i);
@@ -1029,10 +1029,11 @@ public class VTDData extends SQL{
 	
 	/**
 	 * Bind user and server, when a user first subscribes channel in a server
+	 * If map is exist return false
 	 * @param serverID
 	 * @param discordID
 	 */
-	public void addMAP(String serverID,String discordID,String channelNickname) {
+	public boolean addMAP(String serverID,String discordID,String channelNickname) {
 		if(!isMAPExist(serverID,discordID,channelNickname)) {
 			try {
 				Connection conn = getSQLConnection();
@@ -1045,10 +1046,12 @@ public class VTDData extends SQL{
 				ps.executeUpdate();
 				ps.close();
 				conn.close();
+				return true;
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 		}
+		return false;
 	}
 	
 	/**
@@ -1061,7 +1064,7 @@ public class VTDData extends SQL{
 		boolean ret = false;
 		try {
 			Connection conn = getSQLConnection();
-			String query = "SELECT DiscordID FROM VTDD_MAP WHERE ServerID=? and DiscordID=? and Nickname=?;";
+			String query = "SELECT DiscordID FROM VTDD_MAP WHERE ServerID=? AND DiscordID=? AND Nickname=?;";
 			PreparedStatement ps;
 			ps = conn.prepareStatement(query);
 			ps.setString(1, serverID);

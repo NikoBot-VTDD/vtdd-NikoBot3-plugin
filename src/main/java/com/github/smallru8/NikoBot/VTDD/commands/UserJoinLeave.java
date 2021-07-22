@@ -25,12 +25,14 @@ public class UserJoinLeave {
 				//如果有verify紀錄就跳過驗證,因為驗證沒過會自動刪掉
 				boolean verifyFlag = false;
 				if(VTDD.vtdd.isVerifyStatusExist(discordID, channelNickname)||(verifyFlag = VTDD.conf.ytapi.verify(VTDD.vtdd.getRefTokenById(discordID), VTDD.vtdd.getChannelVideoId(channelNickname)))==true) {//驗證
-					VTDD.vtdd.addMAP(serverID, discordID,channelNickname);//給Map
+					if(VTDD.vtdd.addMAP(serverID, discordID,channelNickname)) {//給Map
+						VTDD.vtdd.updateVerifyStatusREF(discordID, channelNickname, 1);//引用+1
+					}
 					g.addRoleToMember(discordID, g.getRoleById(roleID)).queue();//驗證通過給群組
 					
 					if(verifyFlag)//有跑驗證且通過再刷新
 						VTDD.vtdd.updateVerifyStatus(discordID, channelNickname, true);//更新驗證狀態
-					VTDD.vtdd.updateVerifyStatusREF(discordID, channelNickname, 1);//引用+1
+					
 					
 					Core.botAPI.getUserById(discordID).openPrivateChannel().queue(channel -> {
 						channel.sendMessage("In "+serverID+", Channel: "+channelNickname+", :white_check_mark: Verified!!").queue();
@@ -58,8 +60,9 @@ public class UserJoinLeave {
 	 * @return true if remove success
 	 */
 	public static boolean removeRolefromUser(String serverID,String discordID,String channelNickname) {//DONE
-			
+		
 		if(VTDD.vtdd.isChannelExist(channelNickname)&&VTDD.vtdd.isTagExist(serverID, channelNickname)) {//頻道存在&&伺服器有訂閱
+			//System.out.println("RM");///
 			Guild g = Core.botAPI.getGuildById(serverID);
 			String roleID = VTDD.vtdd.getTagID(serverID, channelNickname);
 			if(VTDD.vtdd.isMAPExist(serverID, discordID,channelNickname)) {//User有訂閱這個頻道
