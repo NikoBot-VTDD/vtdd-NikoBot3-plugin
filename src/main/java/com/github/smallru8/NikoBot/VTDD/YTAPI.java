@@ -27,6 +27,7 @@ import java.util.Map;
 public class YTAPI {
 
 	//API KEY
+	@SuppressWarnings("unused")
 	private static String DEVELOPER_KEY = "";
 	//OAuth ID
     private static String clientID = "";
@@ -57,6 +58,7 @@ public class YTAPI {
 			YouTube youtubeService = getService(refToken);
 			YouTube.PlaylistItems.List request =  youtubeService.playlistItems().list("contentDetails");
 			PlaylistItemListResponse response = request
+					.setMaxResults((long) 5)//回傳5筆
 		            .setPlaylistId(getMembersOnlyPlayListByChannelID(channelID))
 		            .execute();//throw GoogleJsonResponseException
 			

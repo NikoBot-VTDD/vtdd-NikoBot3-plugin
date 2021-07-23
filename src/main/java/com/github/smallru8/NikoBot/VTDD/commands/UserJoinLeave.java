@@ -33,7 +33,6 @@ public class UserJoinLeave {
 					if(verifyFlag)//有跑驗證且通過再刷新
 						VTDD.vtdd.updateVerifyStatus(discordID, channelNickname, true);//更新驗證狀態
 					
-					
 					Core.botAPI.getUserById(discordID).openPrivateChannel().queue(channel -> {
 						channel.sendMessage("In "+serverID+", Channel: "+channelNickname+", :white_check_mark: Verified!!").queue();
 					});
