@@ -293,15 +293,15 @@ public class VTDData extends SQL{
 	}
 	
 	/**
-	 * get channel's video id
+	 * get channel's channel id
 	 * @param channelNickname
 	 * @return
 	 */
-	public String getChannelVideoId(String channelNickname) {
+	public String getChannelId(String channelNickname) {
 		String ret = null;
 		try {
 			Connection conn = getSQLConnection();
-			String query = "SELECT VideoID FROM VTDD_CHANNEL WHERE Nickname=?;";
+			String query = "SELECT ChannelID FROM VTDD_CHANNEL WHERE Nickname=?;";
 			
 			PreparedStatement ps;
 			ps = conn.prepareStatement(query);
@@ -310,6 +310,34 @@ public class VTDData extends SQL{
 			
 			if(rs.next())
 				ret = rs.getString(1);
+			
+			ps.close();
+			conn.close();
+			return ret;
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return ret;
+	}
+	
+	/**
+	 * 是否有多種等級的會員
+	 * @param channelNickname
+	 * @return
+	 */
+	public boolean isChannelhaveMultilevelMembers(String channelNickname) {
+		boolean ret = false;
+		try {
+			Connection conn = getSQLConnection();
+			String query = "SELECT MultiLevel FROM VTDD_CHANNEL WHERE Nickname=?;";
+			
+			PreparedStatement ps;
+			ps = conn.prepareStatement(query);
+			ps.setString(1, channelNickname);
+			ResultSet rs = ps.executeQuery();
+			
+			if(rs.next())
+				ret = rs.getBoolean(1);
 			
 			ps.close();
 			conn.close();
@@ -374,15 +402,15 @@ public class VTDData extends SQL{
 	 * @param channelNickname
 	 * @param videoID
 	 */
-	public void addChannel(String channelNickname,String videoID) {
+	public void addChannel(String channelNickname,String channelID) {
 		if(!isChannelExist(channelNickname)) {
 			try {
 				Connection conn = getSQLConnection();
-				String query = "INSERT INTO VTDD_CHANNEL(Nickname,VideoID) VALUES(?,?);";
+				String query = "INSERT INTO VTDD_CHANNEL(Nickname,ChannelID) VALUES(?,?);";
 				PreparedStatement ps;
 				ps = conn.prepareStatement(query);
 				ps.setString(1, channelNickname);
-				ps.setString(2, videoID);
+				ps.setString(2, channelID);
 				ps.executeUpdate();
 				ps.close();
 				conn.close();
@@ -437,14 +465,14 @@ public class VTDData extends SQL{
 	}
 
 	/**
-	 * get all channels and their video id
+	 * get all channels and their channel id
 	 * @return
 	 */
 	public Map<String,String> getChannelMap(){
 		Map<String,String> retm = new HashMap<String,String>();//channelNickname, VideoID
 		try {
 			Connection conn = getSQLConnection();
-			String query = "SELECT Nickname,VideoID FROM VTDD_CHANNEL;";
+			String query = "SELECT Nickname,ChannelID FROM VTDD_CHANNEL;";
 			PreparedStatement ps;
 			ps = conn.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
@@ -463,13 +491,13 @@ public class VTDData extends SQL{
 	
 	/**
 	 * get the users who need to check the membership status
-	 * @return user, channelNicknames......
+	 * @return channelNicknames, user......
 	 */
 	public Map<String,ArrayList<String>> getExpiredUser(){
-		Map<String,ArrayList<String>> retm = new HashMap<String,ArrayList<String>>();//DiscordID,channelNickname
+		Map<String,ArrayList<String>> retm = new HashMap<String,ArrayList<String>>();//channelNickname,DiscordID
 		try {
 			Connection conn = getSQLConnection();
-			String query = "SELECT DiscordID,Nickname FROM VTDD_VERIFY WHERE TIMESTAMPDIFF(DAY, TS, CURRENT_TIMESTAMP) > "+VTDD.conf.verifyDayInterval+";";
+			String query = "SELECT Nickname,DiscordID FROM VTDD_VERIFY WHERE TIMESTAMPDIFF(DAY, TS, CURRENT_TIMESTAMP) > "+VTDD.conf.verifyDayInterval+";";
 			PreparedStatement ps;
 			ps = conn.prepareStatement(query);
 			ResultSet rs = ps.executeQuery();
@@ -479,8 +507,9 @@ public class VTDData extends SQL{
 					retm.get(rs.getString(1)).add(rs.getString(2));
 				}
 				else {
-					retm.put(rs.getString(1), new ArrayList<String>());
-					retm.get(rs.getString(1)).add(rs.getString(2));
+					ArrayList<String> arrLs = new ArrayList<String>();
+					arrLs.add(rs.getString(2));
+					retm.put(rs.getString(1), arrLs);
 				}
 			}
 			

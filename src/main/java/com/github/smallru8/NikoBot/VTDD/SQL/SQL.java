@@ -91,8 +91,9 @@ public class SQL {
 				rs.close();
 				query = "CREATE TABLE VTDD_CHANNEL (\r\n" + 
 						"	Nickname VARCHAR(20) NOT NULL,\r\n" + 
-						"	VideoID VARCHAR(20),\r\n" + 
 						"	Emoji VARCHAR(20),\r\n" + 
+						"	ChannelID VARCHAR(25),\r\n" +
+						"	MultiLevel BOOLEAN,\r\n" + 
 						"	PRIMARY KEY (Nickname)\r\n" + 
 						")CHARACTER SET=utf8mb4 COLLATE utf8mb4_bin;";
 				ps = conn.prepareStatement(query);

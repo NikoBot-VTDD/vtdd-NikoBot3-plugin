@@ -24,7 +24,7 @@ public class UserJoinLeave {
 			if(!VTDD.vtdd.isMAPExist(serverID, discordID,channelNickname)) {//User沒訂閱過這個頻道
 				//如果有verify紀錄就跳過驗證,因為驗證沒過會自動刪掉
 				boolean verifyFlag = false;
-				if(VTDD.vtdd.isVerifyStatusExist(discordID, channelNickname)||(verifyFlag = VTDD.conf.ytapi.verify(VTDD.vtdd.getRefTokenById(discordID), VTDD.vtdd.getChannelVideoId(channelNickname)))==true) {//驗證
+				if(VTDD.vtdd.isVerifyStatusExist(discordID, channelNickname)||(verifyFlag = VTDD.conf.ytapi.verifyUser(discordID, channelNickname))==true) {//驗證
 					if(VTDD.vtdd.addMAP(serverID, discordID,channelNickname)) {//給Map
 						VTDD.vtdd.updateVerifyStatusREF(discordID, channelNickname, 1);//引用+1
 					}
