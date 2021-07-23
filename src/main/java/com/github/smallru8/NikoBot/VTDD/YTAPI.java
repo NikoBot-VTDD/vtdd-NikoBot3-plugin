@@ -108,6 +108,7 @@ public class YTAPI {
     
     /**
      * 驗證全部 認證到期的user
+     * 到期會刪除資料 沒到期則更新TS
      */
     public void verifyAll() {
     	Map<String,String> channelMap = VTDD.vtdd.getChannelMap();//channelNickname, ChannelID
@@ -181,7 +182,7 @@ public class YTAPI {
 		        if(response.getKind()!=null)
 		        	return true;
 		        //System.out.println(response);
-    	} catch (GoogleJsonResponseException e) {//TODO 如果回傳404 是影片不存在 403才是驗證未過
+    	} catch (GoogleJsonResponseException e) {//如果回傳404 是影片不存在 403才是驗證未過
     		StdOutput.warnPrintln("Verifiy failed");
 		} catch (GeneralSecurityException e) {
 			e.printStackTrace();
