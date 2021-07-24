@@ -1,0 +1,62 @@
+-- VTDD database init
+-- by smallru8
+-- 
+-- User data : Disdord id and Youtube toke
+CREATE TABLE VTDD_REGUSER (
+	DiscordID VARCHAR(20) NOT NULL,
+	RefToken VARCHAR(150) NOT NULL,
+	Verify BOOLEAN,
+	TS TIMESTAMP,
+	PRIMARY KEY (DiscordID)
+)CHARACTER SET=utf8mb4;
+
+-- Server list : VTDD bot has joined servers 
+CREATE TABLE VTDD_SERVER (
+	ServerID VARCHAR(20) NOT NULL, 
+	MsgChannel VARCHAR(20),
+	VoteChannel VARCHAR(20),
+	VoteMsgID VARCHAR(20),
+	PRIMARY KEY (ServerID)
+)CHARACTER SET=utf8mb4;
+
+-- vTubers' nickname and membership only video's id
+CREATE TABLE VTDD_CHANNEL (
+	Nickname VARCHAR(20) NOT NULL,
+	VideoID VARCHAR(20),
+	Emoji VARCHAR(20),
+	ChannelID VARCHAR(25),
+	MultiLevel BOOLEAN DEFAULT NULL,
+	PRIMARY KEY (Nickname)
+)CHARACTER SET=utf8mb4 COLLATE utf8mb4_bin;
+
+-- user's channel membership verify status
+CREATE TABLE VTDD_VERIFY (
+	DiscordID VARCHAR(20) NOT NULL,
+	Nickname VARCHAR(20) NOT NULL,
+	TS TIMESTAMP,
+	STATUS BOOLEAN,
+	PRIMARY KEY (DiscordID,Nickname),
+	FOREIGN KEY (DiscordID) REFERENCES VTDD_REGUSER(DiscordID),
+	FOREIGN KEY (Nickname) REFERENCES VTDD_CHANNEL(Nickname)
+)CHARACTER SET=utf8mb4;
+
+-- Server's channel tag id
+CREATE TABLE VTDD_TAG (
+	ServerID VARCHAR(20) NOT NULL,
+	Nickname VARCHAR(20) NOT NULL,
+	TagID VARCHAR(20) NOT NULL,
+	PRIMARY KEY (ServerID,Nickname),
+	FOREIGN KEY (ServerID) REFERENCES VTDD_SERVER(ServerID),
+	FOREIGN KEY (Nickname) REFERENCES VTDD_CHANNEL(Nickname)
+)CHARACTER SET=utf8mb4;
+
+-- Server user MAP
+CREATE TABLE VTDD_MAP (
+	ServerID VARCHAR(20) NOT NULL,
+	DiscordID VARCHAR(20) NOT NULL,
+	Nickname VARCHAR(20) NOT NULL,
+	PRIMARY KEY (ServerID,DiscordID,Nickname),
+	FOREIGN KEY (ServerID) REFERENCES VTDD_SERVER(ServerID),
+	FOREIGN KEY (DiscordID) REFERENCES VTDD_REGUSER(DiscordID),
+	FOREIGN KEY (Nickname) REFERENCES VTDD_CHANNEL(Nickname)
+)CHARACTER SET=utf8mb4;
