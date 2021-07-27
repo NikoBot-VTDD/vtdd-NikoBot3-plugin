@@ -98,6 +98,14 @@ public class ServerRegister {
 				else if(tmp.equalsIgnoreCase("vote")) {
 					CMDProcess_vote(msg);
 				}
+				//手動開始驗證
+				else if(tmp.equalsIgnoreCase("verify")) {
+					if(Core.ADMINS.isAdmin("", msg)) {
+						StdOutput.infoPrintln("Starting verify...");
+						VTDD.conf.ytapi.verifyAll();
+						StdOutput.infoPrintln("Verify... Done!");
+					}
+				}
 			}
 		}
 	}

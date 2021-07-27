@@ -117,10 +117,12 @@ public class YTAPI {
     	Map<String,ArrayList<String>> userMap = VTDD.vtdd.getExpiredUser();//channelNickname, [DiscordIDs...]
     	
     	for (Map.Entry<String, ArrayList<String>> chNameUsersMap : userMap.entrySet()) {//for channelNickname
+    		//StdOutput.infoPrintln("Channel: "+chNameUsersMap.getKey());///
     		boolean multiLevel = VTDD.vtdd.isChannelhaveMultilevelMembers(chNameUsersMap.getKey());//是否有多種等級會員
     		String[] videoId = null;
     		
     		for(String userID:chNameUsersMap.getValue()) {//for userID
+    			//StdOutput.infoPrintln("user: "+userID);///
     			String refToken = VTDD.vtdd.getRefTokenById(userID);
     			if(videoId==null && (videoId = getVideoList(refToken,channelMap.get(chNameUsersMap.getKey())))==null) {
     				//Video id 無法取得跳過處理
@@ -204,6 +206,7 @@ public class YTAPI {
 		for (Map.Entry<String, String> entry : ServerTag.entrySet()) {//拔這個user在各個server的對應role
 			Guild g = Core.botAPI.getGuildById(entry.getKey());
 			Reaction.removeReaction(g.getId(), userID, channelNickname);//拔Vote reaction
+			StdOutput.warnPrintln("Role Id: "+entry.getValue());
 			g.removeRoleFromMember(userID, g.getRoleById(entry.getValue())).queue();//拔role
 			VTDD.vtdd.delMAP(g.getId(), userID, channelNickname);//remove map
 		}

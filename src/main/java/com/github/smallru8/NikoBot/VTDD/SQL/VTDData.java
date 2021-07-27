@@ -1221,7 +1221,7 @@ public class VTDData extends SQL{
 			ResultSet rs = ps.executeQuery();
 			
 			while(rs.next()) {
-				retm.put(rs.getString(1), rs.getString(1));
+				retm.put(rs.getString(1), rs.getString(2));
 			}
 			
 			ps.close();

@@ -49,6 +49,7 @@ public class Listener extends ListenerAdapter{
 			Reaction.addRole(event);
 		}
 	}
+	
 	//指令操作
 	
 	@Override
