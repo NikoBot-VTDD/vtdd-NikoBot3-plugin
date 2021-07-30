@@ -1,5 +1,6 @@
 package com.github.smallru8.NikoBot.VTDD;
 
+import com.github.smallru8.NikoBot.Core;
 import com.github.smallru8.NikoBot.VTDD.commands.Help;
 import com.github.smallru8.NikoBot.VTDD.commands.Reaction;
 import com.github.smallru8.NikoBot.VTDD.commands.UserJoinLeave;
@@ -39,13 +40,14 @@ public class Listener extends ListenerAdapter{
 
 	@Override
 	public void onMessageReactionRemove(MessageReactionRemoveEvent event) {//user取消訂閱role
-		if(!event.getUser().isBot()&&VTDD.cmdChID.getVoteChannel(event.getGuild().getId()).equalsIgnoreCase(event.getChannel().getId())&&VTDD.cmdChID.getVoteMsgID(event.getGuild().getId()).equals(event.getMessageId()))
+		if(Core.botAPI.getSelfUser().getIdLong()!=event.getUserIdLong()&&VTDD.cmdChID.getVoteChannel(event.getGuild().getId()).equalsIgnoreCase(event.getChannel().getId())&&VTDD.cmdChID.getVoteMsgID(event.getGuild().getId()).equals(event.getMessageId())) {
 			Reaction.removeRole(event);//DONE
+		}
 	}
 	
 	@Override
 	public void onMessageReactionAdd(MessageReactionAddEvent event) {//user訂閱role
-		if(!event.getUser().isBot()&&VTDD.cmdChID.getVoteChannel(event.getGuild().getId()).equalsIgnoreCase(event.getChannel().getId())&&VTDD.cmdChID.getVoteMsgID(event.getGuild().getId()).equals(event.getMessageId())) {
+		if(Core.botAPI.getSelfUser().getIdLong()!=event.getUserIdLong()&&VTDD.cmdChID.getVoteChannel(event.getGuild().getId()).equalsIgnoreCase(event.getChannel().getId())&&VTDD.cmdChID.getVoteMsgID(event.getGuild().getId()).equals(event.getMessageId())) {
 			Reaction.addRole(event);
 		}
 	}
